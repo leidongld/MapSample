@@ -40,7 +40,7 @@ import java.util.*
  * created on: 2020/8/6 21:10
  * description:
  */
-public class AMapActivity : AppCompatActivity(),
+class AMapActivity : AppCompatActivity(),
         OnPoiItemClickListener,
         GeocodeSearch.OnGeocodeSearchListener,
         PoiSearch.OnPoiSearchListener,
@@ -68,7 +68,7 @@ public class AMapActivity : AppCompatActivity(),
     // 地图相关
     private val CURRENT_PAGE: Int = 1
     private val POI_DISTANCE: Float = 1000F
-    private val ZOON_RATIO: Float = 15F
+    private val ZOOM_RATIO: Float = 15F
     private val POI_TYPE: String =
             "010000" + "|" +       // 汽车服务相关
                     "020000" + "|" +       // 汽车销售
@@ -101,7 +101,7 @@ public class AMapActivity : AppCompatActivity(),
     private lateinit var mCurrentLatLon: LatLng
     private lateinit var mPoiSearchQuery: PoiSearch.Query
     private lateinit var mPoiSearch: PoiSearch
-    private var mCurrentZoom: Float = ZOON_RATIO
+    private var mCurrentZoom: Float = ZOOM_RATIO
 
     override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
         super.onCreate(savedInstanceState, persistentState)
@@ -111,7 +111,7 @@ public class AMapActivity : AppCompatActivity(),
 
         initMap()
 
-        doLocation();
+        doLocation()
     }
 
     /**
@@ -125,7 +125,7 @@ public class AMapActivity : AppCompatActivity(),
         hasFineLocationPermission = PackageManager.PERMISSION_GRANTED == fineLocationPermissionRes
 
         val coarseLocationPermissionRes = ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION)
-        hasCoarseLocationPermission = PackageManager.PERMISSION_GRANTED == fineLocationPermissionRes
+        hasCoarseLocationPermission = PackageManager.PERMISSION_GRANTED == coarseLocationPermissionRes
 
         if (!hasCoarseLocationPermission && !hasFineLocationPermission) {// 无定位权限
             ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION), REQUEST_CODE_FOE_PERMISSIONS)
@@ -176,13 +176,16 @@ public class AMapActivity : AppCompatActivity(),
      * 初始化地图
      */
     private fun initMap() {
-        mMapView.map
+        mAMap = mMapView.map
 
         mAMap.setOnCameraChangeListener(this)
         mAMap.setOnMapLoadedListener(this)
         mAMap.setInfoWindowAdapter(this)
         mAMap.setOnMapClickListener(this)
         mAMap.setOnMapTouchListener(this)
+
+        mAMap.uiSettings.isMyLocationButtonEnabled = false
+        mAMap.isMyLocationEnabled = true;
 
         mGeocodeSearch = GeocodeSearch(this)
         mGeocodeSearch.setOnGeocodeSearchListener(this)
@@ -282,6 +285,8 @@ public class AMapActivity : AppCompatActivity(),
      * @param poiBean POI对象
      */
     override fun onClickPoiItem(position: Int, poiBean: POIBean) {
+        Toast.makeText(this, poiBean.toString(), Toast.LENGTH_SHORT).show()
+
         val intent = Intent()
         intent.putExtra("poiBean", poiBean)
         setResult(Activity.RESULT_OK, intent)
